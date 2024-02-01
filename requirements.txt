@@ -3,7 +3,7 @@ streamlit-folium
 reportlab
 geopy
 folium
-stpyvista==0.43.2
+stpyvista
 pyvista
 vtk==9.3.0
 bokeh
