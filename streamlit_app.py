@@ -114,22 +114,33 @@ def main():
 
     # Layout for 3D visualization and text results
     col1, col2 = st.columns([3, 2])
-    """
+
     with col1:
-        st.header("3D Building Visualization")
-        # PyVista plot setup
-        plotter = pv.Plotter(off_screen=True)
-        cube = pv.Cube(center=(0, 0, 0), x_length=4, y_length=4, z_length=4)
-        plotter.add_mesh(cube, color='cyan', show_edges=True)
-        plotter.set_background('white')
-        plotter.camera_position = 'iso'
-        
-        # Generate screenshot of the plot
-        img = plotter.screenshot()
-        
-        # Display the screenshot in Streamlit
-        st.image(img, caption='3D Cube Visualization', use_column_width=True)
-    """
+        @st.cache_resource
+        def stpv_usage_example(dummy: str = "cube") -> pv.Plotter:
+        ## Initialize a plotter object
+        plotter = pv.Plotter(window_size=[400, 400])
+
+        ## Create a mesh with a cube
+         mesh = pv.Cube(center=(0, 0, 0))
+
+        ## Add some scalar field associated to the mesh
+        mesh["myscalar"] = mesh.points[:, 2] * mesh.points[:, 1] * mesh.points[:, 0]
+
+        ## Add mesh to the plotter
+        plotter.add_mesh(
+        mesh, scalars="myscalar", cmap="bwr", show_edges=True, edge_color="#001100"
+        )
+
+        ## Final touches
+        plotter.background_color = "white"
+        plotter.view_isometric()
+
+        return plotter
+
+    ## Pass a plotter to stpyvista
+    stpyvista(stpv_usage_example())
+
     with col2:
         # Display Project Information
         st.subheader('Project Information')
