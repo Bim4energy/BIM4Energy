@@ -3,8 +3,13 @@ streamlit-folium
 reportlab
 geopy
 folium
-stpyvista
-pyvista
-vtk==9.3.0
-bokeh
+numpy
+matplotlib
 panel
+bokeh
+param
+pyvista
+stpyvista
+geovista
+colorcet
+requests
