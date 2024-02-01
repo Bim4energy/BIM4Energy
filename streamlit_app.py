@@ -122,7 +122,7 @@ def main():
             plotter = pv.Plotter(window_size=[400, 400])
 
             ## Create a mesh with a cube
-             mesh = pv.Cube(center=(0, 0, 0))
+            mesh = pv.Cube(center=(0, 0, 0))
 
             ## Add some scalar field associated to the mesh
             mesh["myscalar"] = mesh.points[:, 2] * mesh.points[:, 1] * mesh.points[:, 0]
