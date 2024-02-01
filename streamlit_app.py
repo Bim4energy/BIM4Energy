@@ -129,14 +129,14 @@ def main():
             plotter = pv.Plotter(window_size=[400, 400])
 
             ## Create a mesh with a cube
-            mesh = pv.Cube(center=(0, 0, 0))
+            mesh = pv.Cube(center=(0, 0, 0), x_length=2, y_length=2, z_length=1)
 
             ## Add some scalar field associated to the mesh
             mesh["myscalar"] = mesh.points[:, 2] * mesh.points[:, 1] * mesh.points[:, 0]
 
             ## Add mesh to the plotter
             plotter.add_mesh(
-            mesh, scalars="myscalar", cmap="bwr", show_edges=True, edge_color="#001100"
+            mesh, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100"
             )
 
             ## Final touches
