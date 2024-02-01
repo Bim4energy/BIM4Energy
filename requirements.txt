@@ -5,6 +5,6 @@ geopy
 folium
 stpyvista
 pyvista
-vtk-9.3.0
+vtk==9.3.0
 bokeh
 panel
