@@ -114,8 +114,8 @@ def main():
 
     # Layout for 3D visualization and text results
     col1, col2 = st.columns([3, 2])
-
-   """ with col1:
+"""    
+    with col1:
         @st.cache_resource
         def stpv_usage_example(dummy: str = "cube") -> pv.Plotter:
             ## Initialize a plotter object
@@ -139,8 +139,8 @@ def main():
             return plotter
 
         ## Pass a plotter to stpyvista
-        stpyvista(stpv_usage_example())"""
-
+        stpyvista(stpv_usage_example())
+"""
     with col2:
         # Display Project Information
         st.subheader('Project Information')
