@@ -7,6 +7,13 @@ from io import BytesIO
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import pyvista as pv
+from stpyvista import stpyvista
+
+from stpyvista.utils import start_xvfb
+
+if "IS_XVFB_RUNNING" not in st.session_state:
+  start_xvfb()
+  st.session_state.IS_XVFB_RUNNING = True
 
 # Define the buildingStandard dictionary here, so it's accessible in the main() function
 buildingStandard = {
