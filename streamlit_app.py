@@ -118,28 +118,28 @@ def main():
     with col1:
         @st.cache_resource
         def stpv_usage_example(dummy: str = "cube") -> pv.Plotter:
-        ## Initialize a plotter object
-        plotter = pv.Plotter(window_size=[400, 400])
+            ## Initialize a plotter object
+            plotter = pv.Plotter(window_size=[400, 400])
 
-        ## Create a mesh with a cube
-         mesh = pv.Cube(center=(0, 0, 0))
+            ## Create a mesh with a cube
+             mesh = pv.Cube(center=(0, 0, 0))
 
-        ## Add some scalar field associated to the mesh
-        mesh["myscalar"] = mesh.points[:, 2] * mesh.points[:, 1] * mesh.points[:, 0]
+            ## Add some scalar field associated to the mesh
+            mesh["myscalar"] = mesh.points[:, 2] * mesh.points[:, 1] * mesh.points[:, 0]
 
-        ## Add mesh to the plotter
-        plotter.add_mesh(
-        mesh, scalars="myscalar", cmap="bwr", show_edges=True, edge_color="#001100"
-        )
+            ## Add mesh to the plotter
+            plotter.add_mesh(
+            mesh, scalars="myscalar", cmap="bwr", show_edges=True, edge_color="#001100"
+            )
 
-        ## Final touches
-        plotter.background_color = "white"
-        plotter.view_isometric()
+            ## Final touches
+            plotter.background_color = "white"
+            plotter.view_isometric()
 
-        return plotter
+            return plotter
 
-    ## Pass a plotter to stpyvista
-    stpyvista(stpv_usage_example())
+        ## Pass a plotter to stpyvista
+        stpyvista(stpv_usage_example())
 
     with col2:
         # Display Project Information
