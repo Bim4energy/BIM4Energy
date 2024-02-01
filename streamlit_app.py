@@ -115,39 +115,39 @@ def main():
     col1, col2 = st.columns([3, 2])
 
     with col1:
-    @st.cache_resource
-    def stpv_usage_example(number_floors: int, dummy: str = "cube") -> pv.Plotter:
-        plotter = pv.Plotter(window_size=[400, 400])
-    
-        # Create a mesh with a cube for the main part of the house
-        house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=2, y_length=2, z_length=number_floors)
-    
-        # Create a mesh for the roof - using a triangular prism
-        roof_points = np.array([
-            [-1, -1, number_floors],  # Base left
-            [1, -1, number_floors],   # Base right
-            [1, 1, number_floors],    # Base front
-            [-1, 1, number_floors],   # Base back
-            [0, 0, number_floors + 1] # Apex
-        ])
-        roof_faces = np.hstack([[4, 0, 1, 2, 3],  # Base
-                                [3, 0, 1, 4],     # Side 1
-                                [3, 1, 2, 4],     # Side 2
-                                [3, 2, 3, 4],     # Side 3
-                                [3, 3, 0, 4]])    # Side 4
-        roof = pv.PolyData(roof_points, roof_faces)
-    
-        # Combine house base and roof
-        house = house_base + roof
-    
-        # Add the house mesh to the plotter
-        plotter.add_mesh(
-            house, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100"
-        )
-        plotter.background_color = "white"
-        plotter.view_isometric()
-    
-        return plotter
+        @st.cache_resource
+        def stpv_usage_example(number_floors: int, dummy: str = "cube") -> pv.Plotter:
+            plotter = pv.Plotter(window_size=[400, 400])
+        
+            # Create a mesh with a cube for the main part of the house
+            house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=2, y_length=2, z_length=number_floors)
+        
+            # Create a mesh for the roof - using a triangular prism
+            roof_points = np.array([
+                [-1, -1, number_floors],  # Base left
+                [1, -1, number_floors],   # Base right
+                [1, 1, number_floors],    # Base front
+                [-1, 1, number_floors],   # Base back
+                [0, 0, number_floors + 1] # Apex
+            ])
+            roof_faces = np.hstack([[4, 0, 1, 2, 3],  # Base
+                                    [3, 0, 1, 4],     # Side 1
+                                    [3, 1, 2, 4],     # Side 2
+                                    [3, 2, 3, 4],     # Side 3
+                                    [3, 3, 0, 4]])    # Side 4
+            roof = pv.PolyData(roof_points, roof_faces)
+        
+            # Combine house base and roof
+            house = house_base + roof
+        
+            # Add the house mesh to the plotter
+            plotter.add_mesh(
+                house, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100"
+            )
+            plotter.background_color = "white"
+            plotter.view_isometric()
+        
+            return plotter
 
         stpyvista(stpv_usage_example(numberFloorsAboveGround))
 
