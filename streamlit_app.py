@@ -1,6 +1,6 @@
 import streamlit as st
-from streamlit_folium import st_folium
 import folium
+from streamlit_folium import st_folium
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from io import BytesIO
@@ -12,8 +12,8 @@ from stpyvista import stpyvista
 from stpyvista.utils import start_xvfb
 
 if "IS_XVFB_RUNNING" not in st.session_state:
-  start_xvfb()
-  st.session_state.IS_XVFB_RUNNING = True
+    start_xvfb()
+    st.session_state.IS_XVFB_RUNNING = True
 
 # Define the buildingStandard dictionary here, so it's accessible in the main() function
 buildingStandard = {
@@ -39,7 +39,6 @@ buildingStandard = {
     }
 }
 
-# Function to perform reverse geocoding
 def reverse_geocode(lat, lon):
     geolocator = Nominatim(user_agent="streamlit_geopy_user")
     try:
@@ -50,7 +49,6 @@ def reverse_geocode(lat, lon):
         st.error(f"Geocoding error: {e}")
     return None
 
-# Function to create a PDF report
 def create_pdf(project_info, energy_consumption):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
@@ -67,16 +65,12 @@ def create_pdf(project_info, energy_consumption):
     buffer.seek(0)
     return buffer.getvalue()
 
-# Main app
 def main():
-    # Display logo and app title
     st.sidebar.image('https://www.bim4energy.eu/wp-content/uploads/2024/02/Geometric-Logo-3_Colors-1.png', width=300)
     st.title('BIM4ENERGY Assessment')
 
-    # User input for project information
     with st.sidebar:
         st.header('Select Your Location on the Map')
-        # Map setup
         DEFAULT_LATITUDE, DEFAULT_LONGITUDE = 59.9139, 10.7522
         m = folium.Map(location=[DEFAULT_LATITUDE, DEFAULT_LONGITUDE], zoom_start=4)
         m.add_child(folium.LatLngPopup())
@@ -105,7 +99,6 @@ def main():
         st.header('Assessment Information')
         selectBuildingStandard = st.selectbox('Building Standard', ['TEK87', 'TEK97'])
 
-    # Project information and calculations
     project_info = {
         'projectName': projectName,
         'country': country,
@@ -119,37 +112,24 @@ def main():
         "Miscellaneous": areaGrossFloor * buildingStandard["Norway"][selectBuildingStandard]["Single Family"]["Miscellaneous"]
     }
 
-    # Layout for 3D visualization and text results
     col1, col2 = st.columns([3, 2])
-        
+
     with col1:
         @st.cache_resource
-        def stpv_usage_example(dummy: str = "cube") -> pv.Plotter:
-            ## Initialize a plotter object
+        def stpv_usage_example(number_floors: int, dummy: str = "cube") -> pv.Plotter:
             plotter = pv.Plotter(window_size=[400, 400])
-
-            ## Create a mesh with a cube
-            mesh = pv.Cube(center=(0, 0, 0), x_length=2, y_length=2, z_length=numberFloorsAboveGround)
-
-            ## Add some scalar field associated to the mesh
+            mesh = pv.Cube(center=(0, 0, 0), x_length=2, y_length=2, z_length=number_floors)
             mesh["myscalar"] = mesh.points[:, 2] * mesh.points[:, 1] * mesh.points[:, 0]
-
-            ## Add mesh to the plotter
             plotter.add_mesh(
-            mesh, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100"
+                mesh, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100"
             )
-
-            ## Final touches
             plotter.background_color = "white"
             plotter.view_isometric()
-
             return plotter
 
-        ## Pass a plotter to stpyvista
-        stpyvista(stpv_usage_example())
-    
+        stpyvista(stpv_usage_example(numberFloorsAboveGround))
+
     with col2:
-        # Display Project Information
         st.subheader('Project Information')
         st.write(f"Project Name: {projectName}")
         st.write(f"Country: {country}")
@@ -157,11 +137,9 @@ def main():
         st.write(f"Building Type: {buildingType}")
         st.write(f"Year of Construction Completion: {yearConstructionCompletion}")
         st.write(f"Number of Building Users: {numberBuildingUsers}")
-        # Display Calculated Energy Consumption
         st.subheader('Energy Consumption')
         for key, value in energy_consumption.items():
             st.write(f"{key}: {value} kWh")
-        # Generate and download PDF report button
         if st.button('Generate PDF Report'):
             pdf_bytes = create_pdf(project_info, energy_consumption)
             st.download_button(label="Download PDF Report",
