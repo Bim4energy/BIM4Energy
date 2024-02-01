@@ -7,6 +7,7 @@ from io import BytesIO
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import pyvista as pv
+import numpy as np
 from stpyvista import stpyvista
 
 from stpyvista.utils import start_xvfb
@@ -15,7 +16,7 @@ if "IS_XVFB_RUNNING" not in st.session_state:
     start_xvfb()
     st.session_state.IS_XVFB_RUNNING = True
 
-# Define the buildingStandard dictionary here, so it's accessible in the main() function
+# Define the buildingStandard dictionary
 buildingStandard = {
     "Norway": {
         "TEK87": {
@@ -118,10 +119,10 @@ def main():
         @st.cache_resource
         def stpv_usage_example(number_floors: int, dummy: str = "cube") -> pv.Plotter:
             plotter = pv.Plotter(window_size=[400, 400])
-        
+
             # Create a mesh with a cube for the main part of the house
             house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=2, y_length=2, z_length=number_floors)
-        
+
             # Create a mesh for the roof - using a triangular prism
             roof_points = np.array([
                 [-1, -1, number_floors],  # Base left
@@ -136,17 +137,17 @@ def main():
                                     [3, 2, 3, 4],     # Side 3
                                     [3, 3, 0, 4]])    # Side 4
             roof = pv.PolyData(roof_points, roof_faces)
-        
+
             # Combine house base and roof
             house = house_base + roof
-        
+
             # Add the house mesh to the plotter
             plotter.add_mesh(
                 house, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100"
             )
             plotter.background_color = "white"
             plotter.view_isometric()
-        
+
             return plotter
 
         stpyvista(stpv_usage_example(numberFloorsAboveGround))
