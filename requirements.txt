@@ -6,3 +6,5 @@ folium
 stpyvista
 pyvista
 vtk
+bokeh
+panel
