@@ -77,7 +77,7 @@ def main():
         DEFAULT_LATITUDE, DEFAULT_LONGITUDE = 59.9139, 10.7522
         m = folium.Map(location=[DEFAULT_LATITUDE, DEFAULT_LONGITUDE], zoom_start=4)
         m.add_child(folium.LatLngPopup())
-        f_map = st_folium(m, width=10%, height=500)
+        f_map = st_folium(m, width=450, height=500)
         country_name, selected_coordinates = "Norway", f"{DEFAULT_LATITUDE}, {DEFAULT_LONGITUDE}"
         if f_map.get("last_clicked"):
             selected_latitude = f_map["last_clicked"]["lat"]
