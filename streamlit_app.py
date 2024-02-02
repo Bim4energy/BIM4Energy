@@ -1,4 +1,3 @@
-import streamlit as st
 import folium
 from streamlit_folium import st_folium
 from reportlab.lib.pagesizes import letter
@@ -99,14 +98,6 @@ def main():
         heightFloorToCeiling = st.number_input('Height from Floor to Ceiling', value=3.0)
         st.header('Assessment Information')
         selectBuildingStandard = st.selectbox('Building Standard', ['TEK87', 'TEK97'])
-        spaceHeating = st.number_input('Space Heating (kWh)', min_value=0)
-
-    # Calculate the color of the house based on Space Heating
-    house_color = "green"
-    if spaceHeating > 20000:
-        house_color = "red"
-    elif 15000 <= spaceHeating <= 20000:
-        house_color = "yellow"
 
     project_info = {
         'projectName': projectName,
@@ -114,7 +105,7 @@ def main():
         'coordinates': coordinates,
     }
     energy_consumption = {
-        "Space Heating": spaceHeating,
+        "Space Heating": areaGrossFloor * buildingStandard["Norway"][selectBuildingStandard]["Single Family"]["Space Heating"],
         "Service Water Heating": areaGrossFloor * buildingStandard["Norway"][selectBuildingStandard]["Single Family"]["Service Water Heating"],
         "Fans and Pumps": areaGrossFloor * buildingStandard["Norway"][selectBuildingStandard]["Single Family"]["Fans and Pumps"],
         "Internal Lighting": areaGrossFloor * buildingStandard["Norway"][selectBuildingStandard]["Single Family"]["Internal Lighting"],
@@ -128,21 +119,16 @@ def main():
         def stpv_usage_example(number_floors: int, dummy: str = "cube") -> pv.Plotter:
             plotter = pv.Plotter(window_size=[400, 400])
 
-            # Create a green ground plane at (0, 0, 0)
-            ground = pv.Plane(center=(0, 0, 0), direction=(0, 0, 1), i_size=10, j_size=10)
-            ground.actor.GetProperty().SetColor(0, 1, 0)  # Set ground color to green
-
             # Create a mesh with a cube for the main part of the house
-            house_base = pv.Cube(center=(0, 0, numberFloorsBelowGround + numberFloorsAboveGround / 2),
-                                 x_length=2, y_length=2, z_length=numberFloorsAboveGround + numberFloorsBelowGround)
+            house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=2, y_length=2, z_length=number_floors)
 
             # Create a mesh for the roof - using a triangular prism
             roof_points = np.array([
-                [-1, -1, numberFloorsAboveGround + numberFloorsBelowGround],  # Base left
-                [1, -1, numberFloorsAboveGround + numberFloorsBelowGround],   # Base right
-                [1, 1, numberFloorsAboveGround + numberFloorsBelowGround],    # Base front
-                [-1, 1, numberFloorsAboveGround + numberFloorsBelowGround],   # Base back
-                [0, 0, numberFloorsAboveGround + numberFloorsBelowGround + 1] # Apex
+                [-1, -1, number_floors],  # Base left
+                [1, -1, number_floors],   # Base right
+                [1, 1, number_floors],    # Base front
+                [-1, 1, number_floors],   # Base back
+                [0, 0, number_floors + 1] # Apex
             ])
             roof_faces = np.hstack([[4, 0, 1, 2, 3],  # Base
                                     [3, 0, 1, 4],     # Side 1
@@ -154,14 +140,16 @@ def main():
             # Combine house base and roof
             house = house_base + roof
 
-            # Add the house mesh to the plotter with the calculated color
-            plotter.add_mesh(house, color=house_color, show_edges=True, edge_color="#001100")
+            # Add the house mesh to the plotter
+            plotter.add_mesh(
+                house, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100"
+            )
             plotter.background_color = "white"
             plotter.view_isometric()
 
             return plotter
 
-        stpyvista(stpv_usage_example(numberFloorsAboveGround + numberFloorsBelowGround))
+        stpyvista(stpv_usage_example(numberFloorsAboveGround))
 
     with col2:
         st.subheader('Project Information')
