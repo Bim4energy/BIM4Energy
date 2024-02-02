@@ -129,8 +129,8 @@ def main():
             plotter = pv.Plotter(window_size=[400, 400])
 
             # Create a green ground plane at (0, 0, 0)
-            ground = pv.Plane(center=(0, 0, 0), direction=(0, 0, 1), i_size=10, j_size=10, color="green")
-            plotter.add_mesh(ground, show_edges=False)
+            ground = pv.Plane(center=(0, 0, 0), direction=(0, 0, 1), i_size=10, j_size=10)
+            ground.actor.GetProperty().SetColor(0, 1, 0)  # Set ground color to green
 
             # Create a mesh with a cube for the main part of the house
             house_base = pv.Cube(center=(0, 0, numberFloorsBelowGround + numberFloorsAboveGround / 2),
