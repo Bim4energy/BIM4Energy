@@ -118,7 +118,7 @@ def main():
     with col1:
         @st.cache_resource
         def stpv_usage_example(number_floors: int, dummy: str = "cube") -> pv.Plotter:
-            plotter = pv.Plotter(window_size=[100%])
+            plotter = pv.Plotter(window_size=[800,800])
 
             # Create a mesh with a cube for the main part of the house
             house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=2, y_length=2, z_length=number_floors)
