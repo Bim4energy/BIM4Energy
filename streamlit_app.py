@@ -113,7 +113,7 @@ def main():
         "Miscellaneous": areaGrossFloor * buildingStandard["Norway"][selectBuildingStandard]["Single Family"]["Miscellaneous"]
     }
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([3, 1])
 
     with col1:
         @st.cache_resource
