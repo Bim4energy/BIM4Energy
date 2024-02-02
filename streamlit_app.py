@@ -70,6 +70,7 @@ def create_pdf(project_info, energy_consumption):
 
 def main():
     st.sidebar.image('https://www.bim4energy.eu/wp-content/uploads/2024/02/Geometric-Logo-3_Colors-1.png', width=150)
+    st.image('https://www.bim4energy.eu/wp-content/uploads/2024/02/Geometric-Logo-3_Colors-1.png', width=150)
     st.title('BIM4ENERGY Assessment')
 
     with st.sidebar:
