@@ -9,16 +9,17 @@ from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import pyvista as pv
 import numpy as np
 from stpyvista import stpyvista
-
 from stpyvista.utils import start_xvfb
 
+# Check and start XVFB if not running, required for PyVista to work in headless mode
 if "IS_XVFB_RUNNING" not in st.session_state:
     start_xvfb()
     st.session_state.IS_XVFB_RUNNING = True
-    
+
+# Set Streamlit page configuration
 st.set_page_config(layout="wide")
 
-# Define the buildingStandard dictionary
+# Energy standards data for Norway
 buildingStandard = {
     "Norway": {
         "TEK87": {
@@ -42,6 +43,7 @@ buildingStandard = {
     }
 }
 
+# Function to reverse geocode latitude and longitude to an address
 def reverse_geocode(lat, lon):
     geolocator = Nominatim(user_agent="streamlit_geopy_user")
     try:
@@ -52,6 +54,7 @@ def reverse_geocode(lat, lon):
         st.error(f"Geocoding error: {e}")
     return None
 
+# Function to create a PDF report of project information and energy consumption
 def create_pdf(project_info, energy_consumption):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
@@ -68,11 +71,13 @@ def create_pdf(project_info, energy_consumption):
     buffer.seek(0)
     return buffer.getvalue()
 
+# Main function to render the Streamlit app
 def main():
     st.sidebar.image('https://www.bim4energy.eu/wp-content/uploads/2024/02/Geometric-Logo-3_Colors-1.png', width=150)
     st.title('BIM4ENERGY Assessment')
 
     with st.sidebar:
+        # Map interaction for location selection
         st.header('Select Your Location on the Map')
         DEFAULT_LATITUDE, DEFAULT_LONGITUDE = 59.9139, 10.7522
         m = folium.Map(location=[DEFAULT_LATITUDE, DEFAULT_LONGITUDE], zoom_start=4)
@@ -86,22 +91,29 @@ def main():
             address = reverse_geocode(selected_latitude, selected_longitude)
             if address:
                 country_name = address.split(',')[-1].strip()
+
+        # Project information inputs
         st.header('Project Information')
         projectName = st.text_input('Project Name', 'My Project 1')
         country = st.text_input('Country', country_name)
         coordinates = st.text_input('Coordinates', value=selected_coordinates)
-        buildingType = st.selectbox('Building Type', ['Residential', 'Commercial', 'Industrial'])
+        buildingType = st.selectbox('Building Type', ['Residential', 'Commercial', 'Educational'])
         yearConstructionCompletion = st.text_input('Year of Construction Completion', '1950')
         numberBuildingUsers = st.number_input('Number of Building Users', min_value=1, value=4, step=1)
+
+        # Building information inputs
         st.header('Building Information')
         areaGrossFloor = st.number_input('Gross Floor Area', value=200)
         conditionedArea = st.number_input('Conditioned Area', value=150)
         numberFloorsAboveGround = st.number_input('Number of Floors Above Ground', value=2, min_value=0)
         numberFloorsBelowGround = st.number_input('Number of Floors Below Ground', value=0, min_value=0)
         heightFloorToCeiling = st.number_input('Height from Floor to Ceiling', value=3.0)
+
+        # Assessment information
         st.header('Assessment Information')
         selectBuildingStandard = st.selectbox('Building Standard', ['TEK87', 'TEK97'])
 
+    # Calculating energy consumption based on input data
     project_info = {
         'projectName': projectName,
         'country': country,
@@ -118,43 +130,33 @@ def main():
     col1, col2 = st.columns([0.7, 0.3])
 
     with col1:
+        # Visualization of the selected building type using PyVista
         @st.cache_resource
-        def stpv_usage_example(number_floors: int, dummy: str = "cube") -> pv.Plotter:
+        def stpv_usage_example(number_floors: int, building_type: str) -> pv.Plotter:
             plotter = pv.Plotter()
-
-            # Create a mesh with a cube for the main part of the house
-            house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=2, y_length=2, z_length=number_floors)
-
-            # Create a mesh for the roof - using a triangular prism
-            roof_points = np.array([
-                [-1, -1, number_floors],  # Base left
-                [1, -1, number_floors],   # Base right
-                [1, 1, number_floors],    # Base front
-                [-1, 1, number_floors],   # Base back
-                [0, 0, number_floors + 1] # Apex
-            ])
-            roof_faces = np.hstack([[4, 0, 1, 2, 3],  # Base
-                                    [3, 0, 1, 4],     # Side 1
-                                    [3, 1, 2, 4],     # Side 2
-                                    [3, 2, 3, 4],     # Side 3
-                                    [3, 3, 0, 4]])    # Side 4
-            roof = pv.PolyData(roof_points, roof_faces)
-
-            # Combine house base and roof
+            if building_type == "Residential":
+                house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=2, y_length=2, z_length=number_floors)
+                roof_height = 1
+            elif building_type == "Commercial":
+                house_base = pv.Box(bounds=(-1, 1, -1, 1, 0, number_floors))
+                roof_height = 0.2
+            elif building_type == "Educational":
+                house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=3, y_length=3, z_length=number_floors)
+                roof_height = 0
+            if building_type in ["Residential", "Commercial"]:
+                roof = pv.Cube(center=(0, 0, number_floors + roof_height / 2), x_length=2.2, y_length=2.2, z_length=roof_height)
+            else:
+                roof = pv.PolyData()
             house = house_base + roof
-
-            # Add the house mesh to the plotter
-            plotter.add_mesh(
-                house, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100"
-            )
+            plotter.add_mesh(house, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100")
             plotter.background_color = "white"
             plotter.view_isometric()
-
             return plotter
 
-        stpyvista(stpv_usage_example(numberFloorsAboveGround))
+        stpyvista(stpv_usage_example(numberFloorsAboveGround, buildingType))
 
     with col2:
+        # Displaying project and energy consumption information
         st.subheader('Project Information')
         st.write(f"Project Name: {projectName}")
         st.write(f"Country: {country}")
