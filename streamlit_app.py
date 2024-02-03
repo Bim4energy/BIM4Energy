@@ -11,15 +11,15 @@ import numpy as np
 from stpyvista import stpyvista
 from stpyvista.utils import start_xvfb
 
-# Check and start XVFB if not running, required for PyVista to work in headless mode
+# Initializes virtual framebuffer for headless server operation
 if "IS_XVFB_RUNNING" not in st.session_state:
     start_xvfb()
     st.session_state.IS_XVFB_RUNNING = True
 
-# Set Streamlit page configuration
+# Sets Streamlit page configuration
 st.set_page_config(layout="wide")
 
-# Energy standards data for Norway
+# Energy standards data
 buildingStandard = {
     "Norway": {
         "TEK87": {
@@ -43,7 +43,7 @@ buildingStandard = {
     }
 }
 
-# Function to reverse geocode latitude and longitude to an address
+# Function to perform reverse geocoding
 def reverse_geocode(lat, lon):
     geolocator = Nominatim(user_agent="streamlit_geopy_user")
     try:
@@ -54,7 +54,7 @@ def reverse_geocode(lat, lon):
         st.error(f"Geocoding error: {e}")
     return None
 
-# Function to create a PDF report of project information and energy consumption
+# Function to create a PDF report
 def create_pdf(project_info, energy_consumption):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
@@ -71,28 +71,26 @@ def create_pdf(project_info, energy_consumption):
     buffer.seek(0)
     return buffer.getvalue()
 
-# Main function to render the Streamlit app
+# Main function defining the Streamlit app
 def main():
-    st.sidebar.image('https://www.bim4energy.eu/wp-content/uploads/2024/02/Geometric-Logo-3_Colors-1.png', width=150)
+    st.sidebar.image('https://www.example.com/logo.png', width=150)
     st.title('BIM4ENERGY Assessment')
 
     with st.sidebar:
-        # Map interaction for location selection
         st.header('Select Your Location on the Map')
         DEFAULT_LATITUDE, DEFAULT_LONGITUDE = 59.9139, 10.7522
-        m = folium.Map(location=[DEFAULT_LATITUDE, DEFAULT_LONGITUDE], zoom_start=4)
-        m.add_child(folium.LatLngPopup())
-        f_map = st_folium(m, width=450, height=500)
+        map_object = folium.Map(location=[DEFAULT_LATITUDE, DEFAULT_LONGITUDE], zoom_start=4)
+        map_object.add_child(folium.LatLngPopup())
+        folium_map = st_folium(map_object, width=450, height=500)
         country_name, selected_coordinates = "Norway", f"{DEFAULT_LATITUDE}, {DEFAULT_LONGITUDE}"
-        if f_map.get("last_clicked"):
-            selected_latitude = f_map["last_clicked"]["lat"]
-            selected_longitude = f_map["last_clicked"]["lng"]
+        if folium_map.get("last_clicked"):
+            selected_latitude = folium_map["last_clicked"]["lat"]
+            selected_longitude = folium_map["last_clicked"]["lng"]
             selected_coordinates = f"{selected_latitude}, {selected_longitude}"
             address = reverse_geocode(selected_latitude, selected_longitude)
             if address:
                 country_name = address.split(',')[-1].strip()
 
-        # Project information inputs
         st.header('Project Information')
         projectName = st.text_input('Project Name', 'My Project 1')
         country = st.text_input('Country', country_name)
@@ -101,7 +99,6 @@ def main():
         yearConstructionCompletion = st.text_input('Year of Construction Completion', '1950')
         numberBuildingUsers = st.number_input('Number of Building Users', min_value=1, value=4, step=1)
 
-        # Building information inputs
         st.header('Building Information')
         areaGrossFloor = st.number_input('Gross Floor Area', value=200)
         conditionedArea = st.number_input('Conditioned Area', value=150)
@@ -109,11 +106,9 @@ def main():
         numberFloorsBelowGround = st.number_input('Number of Floors Below Ground', value=0, min_value=0)
         heightFloorToCeiling = st.number_input('Height from Floor to Ceiling', value=3.0)
 
-        # Assessment information
         st.header('Assessment Information')
         selectBuildingStandard = st.selectbox('Building Standard', ['TEK87', 'TEK97'])
 
-    # Calculating energy consumption based on input data
     project_info = {
         'projectName': projectName,
         'country': country,
@@ -130,25 +125,30 @@ def main():
     col1, col2 = st.columns([0.7, 0.3])
 
     with col1:
-        # Visualization of the selected building type using PyVista
+        # Enhanced building visualization based on type
         @st.cache_resource
         def stpv_usage_example(number_floors: int, building_type: str) -> pv.Plotter:
             plotter = pv.Plotter()
+            # Building mesh logic based on type
             if building_type == "Residential":
-                house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=2, y_length=2, z_length=number_floors)
-                roof_height = 1
+                house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=4, y_length=4, z_length=number_floors)
+                roof = pv.Cone(center=(0, 0, number_floors), radius=2.5, direction=(0, 0, 1), height=2)
+                chimney = pv.Cube(center=(1, 1, number_floors + 1), x_length=0.5, y_length=0.5, z_length=2)
+                building = house_base + roof + chimney
             elif building_type == "Commercial":
-                house_base = pv.Box(bounds=(-1, 1, -1, 1, 0, number_floors))
-                roof_height = 0.2
+                building = pv.Cube(center=(0, 0, number_floors), x_length=5, y_length=5, z_length=number_floors * 3)
+                for floor in range(1, number_floors * 3, 3):
+                    for x in np.linspace(-2, 2, 5):
+                        for y in np.linspace(-2, 2, 5):
+                            if np.random.rand() > 0.2:
+                                window = pv.Cube(center=(x, y, floor), x_length=0.8, y_length=0.1, z_length=2)
+                                building += window
             elif building_type == "Educational":
-                house_base = pv.Cube(center=(0, 0, number_floors / 2), x_length=3, y_length=3, z_length=number_floors)
-                roof_height = 0
-            if building_type in ["Residential", "Commercial"]:
-                roof = pv.Cube(center=(0, 0, number_floors + roof_height / 2), x_length=2.2, y_length=2.2, z_length=roof_height)
-            else:
-                roof = pv.PolyData()
-            house = house_base + roof
-            plotter.add_mesh(house, color=(0.5, 0.5, 0.5), show_edges=True, edge_color="#001100")
+                main_block = pv.Cube(center=(0, 0, number_floors / 2), x_length=6, y_length=6, z_length=number_floors)
+                secondary_block = pv.Cube(center=(4, 4, number_floors / 2), x_length=3, y_length=3, z_length=number_floors * 0.75)
+                tertiary_block = pv.Cube(center=(-4, -4, number_floors / 2), x_length=3, y_length=3, z_length=number_floors * 0.5)
+                building = main_block + secondary_block + tertiary_block
+            plotter.add_mesh(building, color=(0.7, 0.7, 0.7), show_edges=True, edge_color="black")
             plotter.background_color = "white"
             plotter.view_isometric()
             return plotter
@@ -156,7 +156,6 @@ def main():
         stpyvista(stpv_usage_example(numberFloorsAboveGround, buildingType))
 
     with col2:
-        # Displaying project and energy consumption information
         st.subheader('Project Information')
         st.write(f"Project Name: {projectName}")
         st.write(f"Country: {country}")
