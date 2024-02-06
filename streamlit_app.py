@@ -132,9 +132,7 @@ def main():
             # Building mesh logic based on type
             if building_type == "Residential":
                 house_base = pv.Cube(center=(0, 0, 0), x_length=4, y_length=4, z_length=number_floors)
-                roof = pv.Cone(center=(0, 0, number_floors), radius=2.5, direction=(0, 0, 1), height=2)
-                chimney = pv.Cube(center=(1, 1, number_floors), x_length=0.5, y_length=0.5, z_length=2)
-                building = house_base + roof + chimney
+                building = house_base
             elif building_type == "Commercial":
                 building = pv.Cube(center=(0, 0, number_floors), x_length=5, y_length=5, z_length=number_floors * 3)
                 for floor in range(1, number_floors * 3, 3):
