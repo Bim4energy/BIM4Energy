@@ -125,14 +125,17 @@ def main():
     col1, col2 = st.columns([0.7, 0.3])
 
     with col1:
-        # Enhanced building visualization based on type
         @st.cache_resource
         def stpv_usage_example(number_floors: int, building_type: str) -> pv.Plotter:
             plotter = pv.Plotter()
+            ground = pv.Plane(center=(0, 0, -0.01), i_size=20, j_size=20)  # Simulating the ground
+            plotter.add_mesh(ground, color='green')  # Adding the ground to the plotter with green color
+            
             # Building mesh logic based on type
             if building_type == "Residential":
                 house_base = pv.Cube(center=(0, 0, 0), x_length=4, y_length=4, z_length=number_floors)
-                building = house_base
+                roof = pv.Cone(center=(0, 0, number_floors), radius=3, height=2, direction=(0, 0, 1))  # Simulating the roof
+                building = house_base + roof
             elif building_type == "Commercial":
                 building = pv.Cube(center=(0, 0, number_floors), x_length=5, y_length=5, z_length=number_floors * 3)
                 for floor in range(1, number_floors * 3, 3):
@@ -146,6 +149,7 @@ def main():
                 secondary_block = pv.Cube(center=(4, 4, number_floors / 2), x_length=3, y_length=3, z_length=number_floors * 0.75)
                 tertiary_block = pv.Cube(center=(-4, -4, number_floors / 2), x_length=3, y_length=3, z_length=number_floors * 0.5)
                 building = main_block + secondary_block + tertiary_block
+            
             plotter.add_mesh(building, color=(0.7, 0.7, 0.7), show_edges=True, edge_color="black")
             plotter.background_color = "white"
             plotter.view_isometric()
