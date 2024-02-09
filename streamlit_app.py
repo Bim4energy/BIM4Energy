@@ -128,29 +128,24 @@ def main():
         @st.cache_resource
         def stpv_usage_example(number_floors: int, building_type: str) -> pv.Plotter:
             plotter = pv.Plotter()
-            ground = pv.Plane(center=(0, 0, -number_floors/2), i_size=20, j_size=20)  # Simulating the ground
+            ground = pv.Plane(center=(0, 0, -0.01), i_size=20, j_size=20)  # Simulating the ground
             plotter.add_mesh(ground, color='green')  # Adding the ground to the plotter with green color
             
-            # Building mesh logic based on type
             if building_type == "Residential":
                 house_base = pv.Cube(center=(0, 0, 0), x_length=4, y_length=4, z_length=number_floors)
                 roof = pv.Cone(center=(0, 0, number_floors), radius=3, height=2, direction=(0, 0, 1))  # Simulating the roof
                 building = house_base + roof
+                plotter.add_mesh(building, color=(0.7, 0.7, 0.7), show_edges=True, edge_color="black")
             elif building_type == "Commercial":
-                building = pv.Cube(center=(0, 0, number_floors), x_length=5, y_length=5, z_length=number_floors * 3)
-                for floor in range(1, number_floors * 3, 3):
-                    for x in np.linspace(-2, 2, 5):
-                        for y in np.linspace(-2, 2, 5):
-                            if np.random.rand() > 0.2:
-                                window = pv.Cube(center=(x, y, floor), x_length=0.8, y_length=0.1, z_length=2)
-                                building += window
+                building = pv.read("test.stl")
+                plotter.add_mesh(building, color=(0.5, 0.5, 0.5), show_edges=True)
             elif building_type == "Educational":
                 main_block = pv.Cube(center=(0, 0, number_floors / 2), x_length=6, y_length=6, z_length=number_floors)
                 secondary_block = pv.Cube(center=(4, 4, number_floors / 2), x_length=3, y_length=3, z_length=number_floors * 0.75)
                 tertiary_block = pv.Cube(center=(-4, -4, number_floors / 2), x_length=3, y_length=3, z_length=number_floors * 0.5)
                 building = main_block + secondary_block + tertiary_block
+                plotter.add_mesh(building, color=(0.7, 0.7, 0.7), show_edges=True, edge_color="black")
             
-            plotter.add_mesh(building, color=(0.7, 0.7, 0.7), show_edges=True, edge_color="black")
             plotter.background_color = "white"
             plotter.view_isometric()
             return plotter
