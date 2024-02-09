@@ -128,7 +128,7 @@ def main():
         @st.cache_resource
         def stpv_usage_example(number_floors: int, building_type: str) -> pv.Plotter:
             plotter = pv.Plotter()
-            ground = pv.Plane(center=(0, 0, -0.01), i_size=20, j_size=20)  # Simulating the ground
+            ground = pv.Plane(center=(0, 0, -number_floors/2), i_size=20, j_size=20)  # Simulating the ground
             plotter.add_mesh(ground, color='green')  # Adding the ground to the plotter with green color
             
             if building_type == "Residential":
