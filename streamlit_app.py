@@ -73,7 +73,7 @@ def create_pdf(project_info, energy_consumption):
 
 # Main function defining the Streamlit app
 def main():
-    st.sidebar.image('https://www.bim4energy.eu/wp-content/uploads/2024/02/Header_EU_Logo-1.png', width=315)
+    st.sidebar.image('Header_EU_Logo-1.png', width=315)
     st.title('BIM4ENERGY Assessment')
 
     with st.sidebar:
